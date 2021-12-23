@@ -1,0 +1,13 @@
+spaties = ' ' * 25
+print('%s Poepjesstraat 12' % spaties)
+print('%s glimklontjes' % spaties)
+print()
+print()
+print('geachte meneer')
+print()
+print('ik wil u hierbij melden dat er buiten op het dak')
+print('bij de wc dakpannen ontbreken.')
+print('volgens mij zijn ze laatst weggewaaid door winderigheid.')
+print()
+print('groeten')
+print('kasper')
