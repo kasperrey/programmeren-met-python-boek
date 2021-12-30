@@ -31,7 +31,8 @@ class Bal:
         if pos[3] >= self.canvas_height:
             self.hit_bottom = True
         if self.hit_paddle(pos) == True:
-            self.y = -3
+            paddle_snelheid = abs(paddle.x)
+            self.y = paddle_snelheid - paddle_snelheid * 2
         if pos[0] <= 0:
             self.x = 3
         if pos[2] >= self.canvas_width:
@@ -83,6 +84,8 @@ while 1:
     elif bal.hit_bottom == False:
         paddle.draw()
         bal.draw()
+    else:
+        canvas.create_text(200, 200, text='Game over', font=('helvetica', 20))    
     tk.update_idletasks()
     tk.update()
     time.sleep(0.01)
