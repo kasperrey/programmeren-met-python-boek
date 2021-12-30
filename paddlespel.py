@@ -30,7 +30,7 @@ class Bal:
             self.y = 3
         if pos[3] >= self.canvas_height:
             self.hit_bottom = True
-        if hit_paddle == True:
+        if self.hit_paddle(pos) == True:
             self.y = -3
         if pos[0] <= 0:
             self.x = 3
