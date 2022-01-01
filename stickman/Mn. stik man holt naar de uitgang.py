@@ -111,7 +111,7 @@ class PlatformSprite(Sprite):
         self.image = game.canvas.create_image(x, y, image=self.photo_image, anchor='nw')
         self.cordinates = Coords(x, y, x + width, y + height)
 
-class StickFiguurSprite(sprite):
+class StickFiguurSprite(Sprite):
     def __init__(self, game):
         Sprite.__init__(self, game)
         self.images_left = [
@@ -191,6 +191,25 @@ class StickFiguurSprite(sprite):
                 top = True
                 bottom = True
                 falling = True
+                if self.y > 0 and co.y2 >= self.game.canvas_height:
+                    self.y = 0
+                    bottom = False
+                elif self.y < 0 and co.y1 <= 0:
+                    self.y = 0
+                    left = False
+                    if self.x > 0 and co.x2 >= self.game.canvas_width:
+                        self.x = 0
+                        right = False
+                    elif self.x < 0 and co.x1 <= 0:
+                        self.x = 0
+                        left = False
+                        for sprite in self.game.sprites:
+                            if sprite == self:
+                                continue
+                            sprite_co = sprite.coords()
+                            if top and self.y < 0 and collided_top(co, sprite_co):
+                                self.y = -self.y
+                                top = False
 
 g = Spel()
 platform1 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 0, 480, 100, 10)
