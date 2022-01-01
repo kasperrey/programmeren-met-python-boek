@@ -14,12 +14,24 @@ class Spel:
         self.canvas_height = 500
         self.canvas_width = 500
         self.bg = PhotoImage(file="achtergrond.gif")
+        self.bg2 = PhotoImage(file="achtergrond2.gif")
+        self.bg3 = PhotoImage(file="achtergrond3.gif")
+        self.bg4 = PhotoImage(file="achtergrond4.gif")
         w = self.bg.width()
         h = self.bg.height()
         for x in range(0, 5):
-            for y in range(0, 5):
-                if y == 0 or y == 2 or y == 4:               
-                    self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw')
+                for y in range(0, 5):
+                    if x == 0 or x == 2 or x == 4:
+                        if y == 0 or y == 2 or y == 4:
+                            self.canvas.create_image(x * w, y * h, image=self.bg, anchor='nw')
+                        else:
+                            self.canvas.create_image(x * w, y * h, image=self.bg2, anchor='nw')
+                    elif y == 1 or y == 3 or y == 5:
+                        self.canvas.create_image(x * w, y * h, image=self.bg3, anchor='nw')
+                    else:
+                        self.canvas.create_image(x * w, y * h, image=self.bg4, anchor='nw')
+                        
+                        
         self.sprites = []
         self.running = True
 
@@ -98,7 +110,87 @@ class PlatformSprite(Sprite):
         self.photo_image = photo_image
         self.image = game.canvas.create_image(x, y, image=self.photo_image, anchor='nw')
         self.cordinates = Coords(x, y, x + width, y + height)
-        
+
+class StickFiguurSprite(sprite):
+    def __init__(self, game):
+        Sprite.__init__(self, game)
+        self.images_left = [
+            PhotoImage(file="figuur-L1.gif"),
+            PhotoImage(file="figuur-L2.gif"),
+            PhotoImage(file="figuur-L3.gif")
+        ]
+        self.images_right = [
+            PhotoImage(file="figuur-R1.gif"),
+            PhotoImage(file="figuur-R2.gif"),
+            PhotoImage(file="figuur-R3.gif")
+        ]
+        self.image = game.canvas.create_image(200, 470, image=self.images_left[0], anchor='nw')
+        self.x = -2
+        self.y = 0
+        self.current_image = 0
+        self.current_image_add = 1
+        self.jump_count = 0
+        self.last_time = time.time()
+        self.coordinates = Coords
+        game.canvas.bind_all('<KeyPress-Left>', self.turn_left)
+        game.canvas.bind_all('<KeyPress-Left>', self.turn_right)
+        game.canvas.bind_all('<space>', self.jump)
+
+    def turn_left(self, evt):
+        if self.y == 0:
+            self.x = -2
+
+    def turn_left(self, evt):
+        if self.y == 0:
+            self.x = 2
+
+    def jump(self, evt):
+        if self.y == 0:
+            self.y = -4
+            self.jump_count = 0
+
+    def animate(self):
+        if self.x != 0 and self.y == 0:
+            if time.time() - self.last_time > 0.1:
+                self.last_time = time.time()
+                self.current_image += self.current_image_add
+                if self.current_image >= 2:
+                    self.current_image_add = -1
+                    if self.current_image <= 0:
+                        self.current_image_add = 1
+            if self.x < 0:
+                if self.y != 0:
+                    self.game.canvas.itemconfig(self.image, image=self.images_left[2])
+                else:
+                    self.game.canvas.itemconfig(self.image, image=self.images_left[self.current_image])
+            elif self.x > 0:
+                if self.y != 0:
+                    self.game.canvas.itemconfig(self.image, image=self.images_right[2])
+                else:
+                    self.game.canvas.itemconfig(self.image, image=self.images_right[self.current_image])
+
+    def coords(self):
+        xy = list(self.game.canvas.coords(self.image))
+        self.coordinates.x1 = xy[0]
+        self.coordinates.y1 = xy[1]
+        self.coordinates.x2 = xy[0] + 27
+        self.coordinates.y2 = xy[1] + 30
+        return self.coordinates
+
+    def move(self):
+        self.animate
+        if self.y < 0:
+            self.jump_count += 1
+            if self.jump_count > 20:
+                self.y = 4
+                if self.y > 0:
+                    self.jump_count -= 1
+                co = self.coords()
+                left = True
+                right = True
+                top = True
+                bottom = True
+                falling = True
 
 g = Spel()
 platform1 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 0, 480, 100, 10)
