@@ -210,7 +210,14 @@ class StickFiguurSprite(Sprite):
                             if top and self.y < 0 and collided_top(co, sprite_co):
                                 self.y = -self.y
                                 top = False
-
+                                if bottom and self.y > 0 and collided_bottom(self.y, co, sprite_co):
+                                    self.y = sprite_co.y1 - co.y2
+                                    if self.y < 0
+                                    self.y = 0
+                                    bottom = False
+                                    top = False
+                                if bottom and falling and self.y == 0 and co.y2 < self.game.canvas_height and collided_bottom(1, co, sprite_co):
+                                    falling = False
 g = Spel()
 platform1 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 0, 480, 100, 10)
 platform2 = PlatformSprite(g, PhotoImage(file="platform1.gif"), 150, 440, 100, 10)
