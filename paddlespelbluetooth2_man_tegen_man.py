@@ -3,7 +3,7 @@ from kaspersmicrobit import KaspersMicrobit
 import random
 import time
 
-BLUETOOTH_MICROBIT_OUD = '54:54:75:72:75:9E'
+BLUETOOTH_MICROBIT_OUD = 'D2:16:67:4E:4C:2B'
 BLUETOOTH_MICROBIT_NIEUW = 'E3:7E:99:0D:C1:BA'
 
 MICROBIT_BUTTON_A = 'e95dda90-251d-470a-a062-fa1922dfa9a8'
@@ -14,7 +14,7 @@ class Bal:
         self.canvas = canvas
         self.paddle = paddle
         self.paddle2 = paddle2
-        self.id = canvas.create_oval(10, 10, 26, 26, fill=color)
+        self.id = canvas.create_oval(10, 10, 26, 26, fill=color, outline='', width=0)
         self.canvas.move(self.id, 232, 232)
         starts = [-2, -1, 1, 2]
         # -3, , 3
@@ -85,78 +85,87 @@ class Paddle:
         self.vertraag = False
 
 
-tk = Tk()
-tk.title("spel")
-tk.resizable(0, 0)
-tk.wm_attributes("-topmost", 1)
-canvas = Canvas(tk, width=500, height=500, bd=0, highlightthickness=0)
-canvas.pack()
-tk.update()
-paddletest = 0
-paddle = Paddle(canvas, 'blue', 2, -2)
-canvas.move(paddle.id, 200, 450)
-paddle2 = Paddle(canvas, 'red', 4, -4)
-canvas.move(paddle2.id, 200, 50)
-bal = Bal(canvas, paddle, paddle2, 'red')
+def spel(microbit_adres1=BLUETOOTH_MICROBIT_NIEUW, microbit_adres2=BLUETOOTH_MICROBIT_OUD):
+    tk = Tk()
+    tk.title("spel")
+    tk.resizable(0, 0)
+    tk.wm_attributes("-topmost", 1)
+    canvas = Canvas(tk, width=500, height=500, bd=0, highlightthickness=0)
+    canvas.pack()
+    '''bg = PhotoImage(file='maan_paddle_spel.gif')
+    canvas.create_image(250, 250, image=bg, anchor='nw')'''
+    tk.update()
+    paddletest = 0
+    paddle = Paddle(canvas, 'blue', 2, -2)
+    canvas.move(paddle.id, 200, 450)
+    paddle2 = Paddle(canvas, 'red', 4, -4)
+    canvas.move(paddle2.id, 200, 50)
+    bal = Bal(canvas, paddle, paddle2, 'red')
 
-def sluit_tk_en_kuis_op():
-    microbit1.disconnect()
-    tk.destroy()
-    """    microbit2.disconnect()"""
-
-
-tk.protocol("WM_DELETE_WINDOW", sluit_tk_en_kuis_op)
-canvas.bind_all('<KeyPress-Left>', paddle.turn_left)
-canvas.bind_all('<KeyPress-Right>', paddle.turn_right)
-canvas.bind_all('<Key>', paddle.vertraagbal)
+    def sluit_tk_en_kuis_op():
+        microbit1.disconnect()
+        microbit2.disconnect()
+        tk.destroy()
 
 
-def knop_A_nieuw(sender, data):
-    paddle.turn_left(None)
-    paddle.vertraag = False
-
-def knop_B_nieuw(sender, data):
-    paddle.turn_right(None)
-    paddle.vertraag = False
+    tk.protocol("WM_DELETE_WINDOW", sluit_tk_en_kuis_op)
+    canvas.bind_all('<KeyPress-Left>', paddle.turn_left)
+    canvas.bind_all('<KeyPress-Right>', paddle.turn_right)
+    canvas.bind_all('<Key>', paddle.vertraagbal)
 
 
-def knop_B_oud(s):
-    paddle2.turn_right(None)
-    paddle2.vertraag = False
+    def knop_A_nieuw(sender, data):
+        paddle.turn_left(None)
+        paddle.vertraag = False
+
+    def knop_B_nieuw(sender, data):
+        paddle.turn_right(None)
+        paddle.vertraag = False
+
+
+    def knop_B_oud(sender, data):
+        paddle2.turn_right(None)
+        paddle2.vertraag = False
     
 
-def knop_A_oud(s):
-    paddle2.turn_left(None)
-    paddle2.vertraag = False
+    def knop_A_oud(sender, data):
+        paddle2.turn_left(None)
+        paddle2.vertraag = False
+
+    def stop_spel(s):
+        bal.hit_bottom = True
 
 
-microbit1 = KaspersMicrobit(BLUETOOTH_MICROBIT_NIEUW)
-microbit1.connect()
-microbit1.notify(MICROBIT_BUTTON_A, knop_A_nieuw)
-microbit1.notify(MICROBIT_BUTTON_B, knop_B_nieuw)
-canvas.bind_all('<KeyPress-Left>', knop_A_oud)
-canvas.bind_all('<KeyPress-Right>', knop_B_oud)
-"""
-microbit2 = KaspersMicrobit(BLUETOOTH_MICROBIT_OUD)
-microbit2.connect()
-microbit2.notify(MICROBIT_BUTTON_A, knop_A_oud)
-microbit2.notify(MICROBIT_BUTTON_B, knop_B_oud)
-"""
+    microbit1 = KaspersMicrobit(microbit_adres1)
+    microbit2 = KaspersMicrobit(microbit_adres2)
+    microbit1.connect()
+    microbit2.connect()
+    microbit1.notify(MICROBIT_BUTTON_A, knop_A_nieuw)
+    microbit1.notify(MICROBIT_BUTTON_B, knop_B_nieuw)
+    microbit2.notify(MICROBIT_BUTTON_A, knop_A_oud)
+    microbit2.notify(MICROBIT_BUTTON_B, knop_B_oud)
+    canvas.bind_all('<space>', stop_spel)
 
-while not bal.hit_bottom:
-    if paddle.vertraag == True and paddle2.vertraag == True:
+
+    while not bal.hit_bottom:
+        if paddle.vertraag == True and paddle2.vertraag == True:
+            time.sleep(0.01)
+        else:
+            paddle.draw()
+            paddle2.draw()
+            bal.draw()
+        tk.update_idletasks()
+        tk.update()
         time.sleep(0.01)
-    else:
-        paddle.draw()
-        paddle.draw()
-        paddle2.draw()
-        bal.draw()
+
+    canvas.create_text(200, 200, text='Game over', font=('helvetica', 20))
     tk.update_idletasks()
     tk.update()
-    time.sleep(0.01)
 
-canvas.create_text(200, 200, text='Game over', font=('helvetica', 20))
-tk.update_idletasks()
-tk.update()
+    microbit1.disconnect()
+    microbit2.disconnect()
 
-microbit1.disconnect()
+    tk.destroy()
+    return True
+
+spel()

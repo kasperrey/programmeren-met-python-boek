@@ -6,7 +6,6 @@ import time
 BLUETOOTH_MICROBIT_OUD = 'D2:16:67:4E:4C:2B'
 BLUETOOTH_MICROBIT_NIEUW = 'E3:7E:99:0D:C1:BA'
 
-
 class Bal:
     def __init__(self, canvas, paddle, color):
         self.v = input('hoe snel wil je dat de bal gaat(pixsels per honderste seconden)')
@@ -42,7 +41,7 @@ class Bal:
         if pos[3] >= self.canvas_height:
             self.hit_bottom = True
         if self.hit_paddle(pos) == True:
-            paddle_snelheid = abs(paddle.x)
+            paddle_snelheid = abs(self.paddle.x)
             self.y = paddle_snelheid - paddle_snelheid * 2
             self.punten = self.punten + 1
             self.canvas.itemconfig(self.puntentelling, text=self.punten, font=('helvetica', 20))
@@ -83,55 +82,54 @@ class Paddle:
         self.vertraag = False
 
 
-tk = Tk()
-tk.title("spel")
-tk.resizable(0, 0)
-tk.wm_attributes("-topmost", 1)
-canvas = Canvas(tk, width=500, height=400, bd=0, highlightthickness=0)
-canvas.pack()
-tk.update()
-paddle = Paddle(canvas, 'blue')
-bal = Bal(canvas, paddle, 'red')
+def spel(microbit_adres=BLUETOOTH_MICROBIT_NIEUW):
+    tk = Tk()
+    tk.title("spel")
+    tk.resizable(0, 0)
+    tk.wm_attributes("-topmost", 1)
+    canvas = Canvas(tk, width=500, height=400, bd=0, highlightthickness=0)
+    canvas.pack()
+    tk.update()
+    paddle = Paddle(canvas, 'blue')
+    bal = Bal(canvas, paddle, 'red')
 
-def redraw():
-    if paddle.vertraag:
-        time.sleep(0.01)
-    elif not bal.hit_bottom:
-        paddle.draw()
-        bal.draw()
-    elif bal.hit_bottom:
-        canvas.create_text(200, 200, text='Game over', font=('helvetica', 20))
+    def redraw():
+        if paddle.vertraag:
+            time.sleep(0.01)
+        elif not bal.hit_bottom:
+            paddle.draw()
+            bal.draw()
+        elif bal.hit_bottom:
+            canvas.create_text(200, 200, text='Game over', font=('helvetica', 20))
+        tk.after(10, redraw)
+
     tk.after(10, redraw)
 
 
-tk.after(10, redraw)
-
-def knop_A(knop):
-    tk.event_generate('<<MICROBIT_BUTTON_A>>', when='tail')
-    paddle.vertraag = False
+    def knop_A(sender, data=None):
+        tk.event_generate('<<MICROBIT_BUTTON_A>>', when='tail')
+        paddle.vertraag = False
 
 
 
-def knop_B(knop):
-    tk.event_generate('<<MICROBIT_BUTTON_B>>', when='tail')
-    paddle.vertraag = False
+    def knop_B(sender, data=None):
+        tk.event_generate('<<MICROBIT_BUTTON_B>>', when='tail')
+        paddle.vertraag = False
 
 
-def knop_up(knop):
-    paddle.x = 0
+    microbit1 = KaspersMicrobit(microbit_adres)
+    microbit1.connect()
+    microbit1.buttons.on_button_a(press=knop_A, up=None)
+    microbit1.buttons.on_button_b(press=knop_B, up=None)
 
 
-microbit1 = KaspersMicrobit(BLUETOOTH_MICROBIT_NIEUW)
-microbit1.connect()
-microbit1.buttons.on_button_a(press=knop_A, up=None)
-microbit1.buttons.on_button_b(press=knop_B, up=None)
+
+    def sluit_tk_en_kuis_op():
+        microbit1.disconnect()
+        tk.destroy()
 
 
-def sluit_tk_en_kuis_op():
-    microbit1.disconnect()
-    tk.destroy()
+    tk.protocol("WM_DELETE_WINDOW", sluit_tk_en_kuis_op)
 
-
-tk.protocol("WM_DELETE_WINDOW", sluit_tk_en_kuis_op)
-
-tk.mainloop()
+    tk.mainloop()
+    return True

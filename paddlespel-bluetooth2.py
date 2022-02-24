@@ -103,8 +103,8 @@ def knop_B(sender, data):
 
 microbit1 = KaspersMicrobit(BLUETOOTH_MICROBIT_NIEUW)
 microbit1.connect()
-microbit1.notify(MICROBIT_BUTTON_A, knop_A)
-microbit1.notify(MICROBIT_BUTTON_B, knop_B)
+microbit1.buttons.on_button_a(press=knop_A, up=None)
+microbit1.buttons.on_button_b(press=knop_B, up=None)
 
 
 while not bal.hit_bottom:
